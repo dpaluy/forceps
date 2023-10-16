@@ -224,8 +224,6 @@ module Forceps
 
       def copy_objects_associated_by_association_kind(local_object, remote_object, association_kind)
         associations_to_copy(remote_object, association_kind).collect(&:name).each do |association_name|
-          puts "SPR: remote_object.class.base_class.name = #{remote_object.class.base_class.name}"
-          puts "SPR: options.fetch(:ignore_model, []).include?(remote_object.class.base_class.name) = #{options.fetch(:ignore_model, []).include?(remote_object.class.base_class.name)}"
           unless options.fetch(:ignore_model, []).include?(remote_object.class.base_class.name)
             send "copy_associated_objects_in_#{association_kind}", local_object, remote_object, association_name
           end
