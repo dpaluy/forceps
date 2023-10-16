@@ -4,11 +4,13 @@ module Forceps
 
     def configure(options={})
       @options = options.merge(default_options)
+      @models_without_table = []
+      @models_with_table = []
 
       declare_remote_model_classes
       make_associations_reference_remote_classes
 
-      logger.debug "Classes handled by Forceps: #{model_classes.collect(&:name).inspect}"
+      logger.debug "Classes handled by Forceps: #{@models_with_table.collect(&:name).inspect}"
     end
 
     private
@@ -59,13 +61,29 @@ module Forceps
           head = head.const_set(module_name, Module.new)
         end
       end
-      head.const_set(class_name, build_new_remote_class(klass))
+
+      instance = build_new_remote_class(klass)
+      return unless instance
+
+      head.const_set(class_name, instance)
 
       remote_class_for(full_class_name).establish_connection :remote
     end
 
     def build_new_remote_class(local_class)
-      needs_type_condition = (local_class.base_class != ActiveRecord::Base) && local_class.finder_needs_type_condition?
+      needs_type_condition = (local_class.base_class != ActiveRecord::Base)
+
+      begin
+        needs_type_condition &&= local_class.finder_needs_type_condition?
+      rescue ActiveRecord::StatementInvalid => e
+        raise e unless e.cause.is_a?(PG::UndefinedTable)
+
+        # Prevent error caused by auto-generated framework models.
+        puts "Ignoring model without table: #{local_class}"
+        @models_without_table << local_class
+        return nil
+      end
+
       Class.new(local_class) do
         self.table_name = local_class.table_name
 
@@ -112,7 +130,8 @@ module Forceps
     end
 
     def make_associations_reference_remote_classes
-      model_classes.each do |model_class|
+      @models_with_table = model_classes - @models_without_table
+      @models_with_table.each do |model_class|
         make_associations_reference_remote_classes_for(model_class)
       end
     end
