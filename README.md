@@ -160,6 +160,12 @@ Forceps.configure ignore_model: ['LineItem']
 
 Then anytime this model is reached while copying a relation, it will be ignored.
 
+### Update local models
+
+Both `update_local_model` and `update_optional_local_model` will tell this tool to load a local model and update it with the attributes from the remote model. It's useful to reconstruct associations that have been nullified, i.e. the associated model exists but it has been unlinked.
+
+Use `update_local_model` where possible. Only use `update_optional_local_model` in rare cases where the existence of local models are conditional. For example, `has_many :items, -> { where(active: true) }, dependent: :delete_all
+
 ### Rails and lazy loading
 
 In development, Rails loads classes lazily as they are used. Forceps will only know how to handle those classes defined when `Forceps.configure` is executed. You can make sure that all the Rails models are loaded before executing `Forceps.configure` with:
@@ -195,7 +201,7 @@ invoice.line_items.last.class # Forceps::Remote::LineItem
 
 ## Compatibility
 
-Rails 3 and 4
+Rails 6 and 7
 
 ## Run the test suite
 
