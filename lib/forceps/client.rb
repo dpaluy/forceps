@@ -71,6 +71,8 @@ module Forceps
     end
 
     def build_new_remote_class(local_class)
+      return if local_class.name == 'PurchaseDetail'
+
       needs_type_condition = (local_class.base_class != ActiveRecord::Base)
 
       begin
