@@ -108,15 +108,16 @@ module Forceps
 
         disable_all_callbacks_for(base_class)
 
-        cloned_object = base_class.new
-        cloned_object.id = remote_object.id # Use the same ID as remote
-        copy_attributes(cloned_object, simple_attributes_to_copy(remote_object))
-
         class_name = remote_object.class.base_class.name
-        if options.fetch(:use_local_model, []).include?(class_name)
+        if options.fetch(:update_local_model, []).include?(class_name)
           puts "Using local model '#{class_name}' with ID: #{remote_object.id}"
-          return base_class.find(remote_object.id)
+          cloned_object = base_class.find(remote_object.id)
+        else
+          cloned_object = base_class.new
+          cloned_object.id = remote_object.id # Use the same ID as remote
         end
+
+        copy_attributes(cloned_object, simple_attributes_to_copy(remote_object))
 
         cloned_object.save!(validate: false)
         invoke_callbacks(:after_each, cloned_object, remote_object)
