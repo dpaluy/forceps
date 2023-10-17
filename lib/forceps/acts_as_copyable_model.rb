@@ -113,8 +113,16 @@ module Forceps
           puts "Using local model '#{class_name}' with ID: #{remote_object.id}"
           cloned_object = base_class.find(remote_object.id)
         else
-          cloned_object = base_class.new
-          cloned_object.id = remote_object.id # Use the same ID as remote
+          if options.fetch(:update_optional_local_model, []).include?(class_name)
+            if (cloned_object = base_class.find_by(id: remote_object.id))
+              puts "Found optional local model '#{class_name}' with ID: #{remote_object.id}"
+            end
+          end
+
+          unless cloned_object
+            cloned_object = base_class.new
+            cloned_object.id = remote_object.id # Use the same ID as remote
+          end
         end
 
         copy_attributes(cloned_object, simple_attributes_to_copy(remote_object))
