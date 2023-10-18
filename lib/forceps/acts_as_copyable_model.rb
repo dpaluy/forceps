@@ -133,7 +133,7 @@ module Forceps
         begin
           cloned_object.save!(validate: false)
         rescue => e
-          puts "FAIL1: #{remote_object.inspect} - #{copied_remote_objects.inspect} - #{copied_remote_objects[remote_object]}"
+          puts "FAIL1: #{remote_object.inspect} - #{copied_remote_objects[remote_object]}"
           raise e
         end
         invoke_callbacks(:after_each, cloned_object, remote_object)
