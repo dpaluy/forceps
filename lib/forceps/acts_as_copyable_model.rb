@@ -304,6 +304,14 @@ module Forceps
               puts ""
             end
 
+            if remote_associated_object.class.name == 'StoreItemPurchase'
+              puts ""
+              puts "*****"
+              puts "STORE ITEM PURCHASE1: #{association_name} - #{remote_object.inspect}"
+              puts "STORE ITEM PURCHASE2: #{association_name} - #{remote_associated_object.inspect}"
+              puts ""
+            end
+
             copy(remote_associated_object) if remote_associated_object
           end
         end
