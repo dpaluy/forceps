@@ -50,6 +50,7 @@ module Forceps
 
       def perform_copy(remote_object)
         copied_object = local_copy_with_simple_attributes(remote_object)
+        raise "Copied object should not be nil" unless copied_object
         copied_remote_objects[remote_object] = copied_object
         copy_associated_objects(copied_object, remote_object) unless was_reused?(copied_object)
         copied_object
