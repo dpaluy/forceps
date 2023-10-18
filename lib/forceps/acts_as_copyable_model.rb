@@ -132,6 +132,7 @@ module Forceps
 
         begin
           cloned_object.save!(validate: false)
+          puts "SUCCEED1: #{remote_object.inspect}}"
         rescue => e
           puts "FAIL1: #{remote_object.inspect} - #{copied_remote_objects[remote_object]}"
           raise e
