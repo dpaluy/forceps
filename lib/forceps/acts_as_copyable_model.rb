@@ -275,9 +275,19 @@ module Forceps
       end
 
       def copy_associated_objects_in_belongs_to(remote_object)
+
         with_nested_logging do
           associations_to_copy(remote_object, :belongs_to).collect(&:name).each do |association_name|
             remote_associated_object = remote_object.send(association_name)
+
+            if remote_object.class.name == 'Forceps::Remote::StorePurchase'
+              puts ""
+              puts "*****"
+              puts "BELONGS_TO1: #{association_name} - #{remote_object.inspect}"
+              puts "BELONGS_TO2: #{association_name} - #{remote_associated_object.inspect}"
+              puts ""
+            end
+
             copy(remote_associated_object) if remote_associated_object
           end
         end
