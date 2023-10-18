@@ -50,7 +50,7 @@ module Forceps
 
       def perform_copy(remote_object)
         copied_object = local_copy_with_simple_attributes(remote_object)
-        raise 'Copied object should not be nil' unless copied_object
+        # raise 'Copied object should not be nil' unless copied_object
         copied_remote_objects[remote_object] = copied_object
         copy_associated_objects(copied_object, remote_object) unless was_reused?(copied_object)
         copied_object
@@ -285,6 +285,14 @@ module Forceps
               puts "*****"
               puts "BELONGS_TO1: #{association_name} - #{remote_object.inspect}"
               puts "BELONGS_TO2: #{association_name} - #{remote_associated_object.inspect}"
+              puts ""
+            end
+
+            if remote_associated_object.class.name == 'Club'
+              puts ""
+              puts "*****"
+              puts "FOUND1: #{association_name} - #{remote_object.inspect}"
+              puts "FOUND2: #{association_name} - #{remote_associated_object.inspect}"
               puts ""
             end
 
