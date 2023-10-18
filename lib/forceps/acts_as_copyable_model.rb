@@ -130,7 +130,12 @@ module Forceps
 
         copy_attributes(cloned_object, simple_attributes_to_copy(remote_object))
 
-        cloned_object.save!(validate: false)
+        begin
+          cloned_object.save!(validate: false)
+        rescue => e
+          puts "FAIL1: #{remote_object.inspect} - #{copied_remote_objects.inspect} - #{copied_remote_objects[remote_object]}"
+          raise e
+        end
         invoke_callbacks(:after_each, cloned_object, remote_object)
         cloned_object
       end
