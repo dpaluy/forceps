@@ -291,8 +291,16 @@ module Forceps
             if remote_associated_object.class.name == 'Club'
               puts ""
               puts "*****"
-              puts "FOUND1: #{association_name} - #{remote_object.inspect}"
-              puts "FOUND2: #{association_name} - #{remote_associated_object.inspect}"
+              puts "CLUB1: #{association_name} - #{remote_object.inspect}"
+              puts "CLUB2: #{association_name} - #{remote_associated_object.inspect}"
+              puts ""
+            end
+
+            if remote_associated_object.class.name == 'StoreItem'
+              puts ""
+              puts "*****"
+              puts "STORE ITEM1: #{association_name} - #{remote_object.inspect}"
+              puts "STORE ITEM2: #{association_name} - #{remote_associated_object.inspect}"
               puts ""
             end
 
