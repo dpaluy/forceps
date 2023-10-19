@@ -123,7 +123,8 @@ module Forceps
 
           unless cloned_object
             cloned_object = base_class.new
-            cloned_object.id = remote_object.id # Use the same ID as remote
+            # Use the same ID as remote if available ..
+            cloned_object.id = remote_object.id if remote_object.class.column_names.include?('id')
           end
         end
 
@@ -257,7 +258,11 @@ module Forceps
       end
 
       def copy_associated_objects_in_has_many(local_object, remote_object, association_name)
-        remote_object.send(association_name).find_each do |remote_associated_object|
+        # TODO:
+        #   find_each demands an id column which some join tables do not have, so use just .each
+        #   .. we should get the associated class and check it's column_names for 'id'
+        # remote_object.send(association_name).find_each do |remote_associated_object|
+        remote_object.send(association_name).each do |remote_associated_object|
           local_object.send(association_name) << copy(remote_associated_object)
         end
       end
@@ -277,7 +282,11 @@ module Forceps
       end
 
       def copy_associated_objects_in_has_and_belongs_to_many(local_object, remote_object, association_name)
-        remote_object.send(association_name).find_each do |remote_associated_object|
+        # TODO:
+        #   find_each demands an id column which some join tables do not have, so use just .each
+        #   .. we should get the associated class and check it's column_names for 'id'
+        # remote_object.send(association_name).find_each do |remote_associated_object|
+        remote_object.send(association_name).each do |remote_associated_object|
           cloned_local_associated_object = copy(remote_associated_object)
           unless local_object.send(association_name).where(id: cloned_local_associated_object.id).exists?
             local_object.send(association_name) << cloned_local_associated_object
