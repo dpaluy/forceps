@@ -50,6 +50,7 @@ module Forceps
 
       def perform_copy(remote_object)
         copied_object = local_copy_with_simple_attributes(remote_object)
+        # raise 'Copied object should not be nil' unless copied_object
         copied_remote_objects[remote_object] = copied_object
         copy_associated_objects(copied_object, remote_object) unless was_reused?(copied_object)
         copied_object
@@ -130,7 +131,13 @@ module Forceps
 
         copy_attributes(cloned_object, simple_attributes_to_copy(remote_object))
 
-        cloned_object.save!(validate: false)
+        begin
+          cloned_object.save!(validate: false)
+          puts "SUCCEED1: #{remote_object.inspect}}"
+        rescue => e
+          puts "FAIL1: #{remote_object.inspect} - #{copied_remote_objects[remote_object]}"
+          raise e
+        end
         invoke_callbacks(:after_each, cloned_object, remote_object)
         cloned_object
       end
@@ -273,9 +280,43 @@ module Forceps
       end
 
       def copy_associated_objects_in_belongs_to(remote_object)
+
         with_nested_logging do
           associations_to_copy(remote_object, :belongs_to).collect(&:name).each do |association_name|
             remote_associated_object = remote_object.send(association_name)
+
+            if remote_object.class.name == 'Forceps::Remote::StorePurchase'
+              puts ""
+              puts "*****"
+              puts "BELONGS_TO1: #{association_name} - #{remote_object.inspect}"
+              puts "BELONGS_TO2: #{association_name} - #{remote_associated_object.inspect}"
+              puts ""
+            end
+
+            if remote_associated_object.class.name == 'Club'
+              puts ""
+              puts "*****"
+              puts "CLUB1: #{association_name} - #{remote_object.inspect}"
+              puts "CLUB2: #{association_name} - #{remote_associated_object.inspect}"
+              puts ""
+            end
+
+            if remote_associated_object.class.name == 'StoreItem'
+              puts ""
+              puts "*****"
+              puts "STORE ITEM1: #{association_name} - #{remote_object.inspect}"
+              puts "STORE ITEM2: #{association_name} - #{remote_associated_object.inspect}"
+              puts ""
+            end
+
+            if remote_associated_object.class.name == 'StoreItemPurchase'
+              puts ""
+              puts "*****"
+              puts "STORE ITEM PURCHASE1: #{association_name} - #{remote_object.inspect}"
+              puts "STORE ITEM PURCHASE2: #{association_name} - #{remote_associated_object.inspect}"
+              puts ""
+            end
+
             copy(remote_associated_object) if remote_associated_object
           end
         end
