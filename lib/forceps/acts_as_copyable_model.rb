@@ -267,11 +267,12 @@ module Forceps
 
       def assert_associated_object_is_remote(remote_associated_object, remote_object, association_name)
         if remote_associated_object && !remote_associated_object.class.name.start_with?('Forceps::Remote::')
-          puts ""
-          puts "*****"
-          puts "DANGER1a: #{association_name} - #{remote_object.inspect}"
-          puts "DANGER2: #{association_name} - #{remote_associated_object.inspect}"
-          puts ""
+          puts
+          puts "Object: #{remote_object.inspect}"
+          puts "Non-remote association: #{remote_associated_object.inspect}"
+          puts
+
+          raise "#{remote_object.class.name} -> #{association_name} -> #{remote_associated_object.class.name}"
         end
       end
 
