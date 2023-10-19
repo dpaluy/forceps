@@ -286,11 +286,19 @@ module Forceps
           associations_to_copy(remote_object, :belongs_to).collect(&:name).each do |association_name|
             remote_associated_object = remote_object.send(association_name)
 
-            unless remote_object.class.name.start_with?('Forceps::Remote::')
+            unless remote_associated_object.class.name.start_with?('Forceps::Remote::')
               puts ""
               puts "*****"
               puts "DANGER1: #{association_name} - #{remote_object.inspect}"
               puts "DANGER2: #{association_name} - #{remote_associated_object.inspect}"
+              puts ""
+            end
+
+            unless remote_object.class.name.start_with?('Forceps::Remote::')
+              puts ""
+              puts "*****"
+              puts "DANGER3: #{association_name} - #{remote_object.inspect}"
+              puts "DANGER4: #{association_name} - #{remote_associated_object.inspect}"
               puts ""
             end
 
