@@ -265,10 +265,12 @@ module Forceps
         end
       end
 
+      # Sanity check
       def assert_associated_object_is_remote(remote_associated_object, remote_object, association_name)
         if remote_associated_object && !remote_associated_object.class.name.start_with?('Forceps::Remote::')
           puts
           puts "Object: #{remote_object.inspect}"
+          puts
           puts "Non-remote association: #{remote_associated_object.inspect}"
           puts
 
@@ -355,6 +357,8 @@ module Forceps
         #   .. we should get the associated class and check it's column_names for 'id'
         # remote_object.send(association_name).find_each do |remote_associated_object|
         remote_object.send(association_name).each do |remote_associated_object|
+          assert_associated_object_is_remote(remote_associated_object, remote_object, association_name)
+
           cloned_local_associated_object = copy(remote_associated_object)
           unless local_object.send(association_name).where(id: cloned_local_associated_object.id).exists?
             local_object.send(association_name) << cloned_local_associated_object
