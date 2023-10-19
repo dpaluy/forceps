@@ -265,18 +265,33 @@ module Forceps
         end
       end
 
+      def assert_associated_object_is_remote(remote_associated_object, remote_object, association_name)
+        unless remote_associated_object.class.name.start_with?('Forceps::Remote::')
+          puts ""
+          puts "*****"
+          puts "DANGER1a: #{association_name} - #{remote_object.inspect}"
+          puts "DANGER2: #{association_name} - #{remote_associated_object.inspect}"
+          puts ""
+        end
+      end
+
       def copy_associated_objects_in_has_many(local_object, remote_object, association_name)
         # TODO:
         #   find_each demands an id column which some join tables do not have, so use just .each
         #   .. we should get the associated class and check it's column_names for 'id'
         # remote_object.send(association_name).find_each do |remote_associated_object|
         remote_object.send(association_name).each do |remote_associated_object|
+          assert_associated_object_is_remote(remote_associated_object, remote_object, association_name)
+
           local_object.send(association_name) << copy(remote_associated_object)
         end
       end
 
       def copy_associated_objects_in_has_one(local_object, remote_object, association_name)
         remote_associated_object = remote_object.send(association_name)
+
+        assert_associated_object_is_remote(remote_associated_object, remote_object, association_name)
+
         local_object.send "#{association_name}=", remote_associated_object && copy(remote_associated_object)
       end
 
@@ -286,13 +301,7 @@ module Forceps
           associations_to_copy(remote_object, :belongs_to).collect(&:name).each do |association_name|
             remote_associated_object = remote_object.send(association_name)
 
-            unless remote_associated_object.class.name.start_with?('Forceps::Remote::')
-              puts ""
-              puts "*****"
-              puts "DANGER1: #{association_name} - #{remote_object.inspect}"
-              puts "DANGER2: #{association_name} - #{remote_associated_object.inspect}"
-              puts ""
-            end
+            assert_associated_object_is_remote(remote_associated_object, remote_object, association_name)
 
             unless remote_object.class.name.start_with?('Forceps::Remote::')
               puts ""
