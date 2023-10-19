@@ -125,8 +125,7 @@ module Forceps
           unless cloned_object
             cloned_object = base_class.new
             # Use the same ID as remote if available ..
-            cloned_object.id = remote_object.id
-            # if remote_object.class.column_names.include?('id')
+            cloned_object.id = remote_object.id if remote_object.class.column_names.include?('id')
           end
         end
 
