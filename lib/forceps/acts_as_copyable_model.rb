@@ -324,16 +324,16 @@ module Forceps
         association_class.column_names.include?('id')
       end
 
-      def association_find_each(remote_object, association_kind, association_name, block)
+      def association_find_each(remote_object, association_kind, association_name, &block)
         if association_table_has_id?(remote_object, association_kind, association_name)
-          remote_object.send(association_name).find_each(block)
+          remote_object.send(association_name).find_each(&block)
         else # Some join tables do not have an `id` column, in which case find_each() cannot be used.
           raise "DOESN"
 
           # Reload the association to force load the associated remote objects. Without this, the association
           # will return cached local objects instead, which presumably were assigned earlier in
           # `simple_attributes_to_copy()`.
-          remote_object.send(association_name).reload.each(block)
+          remote_object.send(association_name).reload.each(&block)
         end
       end
 
