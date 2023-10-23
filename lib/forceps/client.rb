@@ -71,10 +71,6 @@ module Forceps
     end
 
     def build_new_remote_class(local_class)
-      # TODO Make generic, can we do R::ItemPurchase -> R:STIItemPurchase (Clone of Item Purchase) -> R:PurchaseDetail -> PurchaseDetail
-      # ItemPurchase -> PurchaseDetail
-      # return if local_class.name == 'PurchaseDetail'
-
       needs_type_condition = (local_class.base_class != ActiveRecord::Base)
 
       begin
