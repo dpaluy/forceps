@@ -319,6 +319,24 @@ module Forceps
         end
       end
 
+      def association_table_has_id?(remote_object, association_kind, association_name)
+        association_class = remote_object.class.reflect_on_all_associations(association_kind).find { |a| a.name == association_name }.klass
+        association_class.column_names.include?('id')
+      end
+
+      def association_find_each(remote_object, association_kind, association_name, &block)
+        if association_table_has_id?(remote_object, association_kind, association_name)
+          remote_object.send(association_name).find_each(block)
+        else # Some join tables do not have an `id` column, in which case find_each() cannot be used.
+          raise "DOESN"
+
+          # Reload the association to force load the associated remote objects. Without this, the association
+          # will return cached local objects instead, which presumably were assigned earlier in
+          # `simple_attributes_to_copy()`.
+          remote_object.send(association_name).reload.each(block)
+        end
+      end
+
       def copy_associated_objects_in_has_and_belongs_to_many(local_object, remote_object, association_name)
         block = lambda do |remote_associated_object|
           assert_associated_object_is_remote(remote_associated_object, remote_object, association_name)
@@ -329,17 +347,21 @@ module Forceps
           end
         end
 
-        association_class = remote_object.class.reflect_on_all_associations(:has_and_belongs_to_many).find { |a| a.name == association_name }.klass
-        if association_class.column_names.include?('id')
-          remote_object.send(association_name).find_each(&block)
-        else # Some join tables do not have an `id` column, in which case find_each() cannot be used.
-          raise "DOESN"
+        association_find_each(remote_object, :has_and_belongs_to_many, association_name, block)
 
-          # Reload the association to force load the associated remote objects. Without this, the association
-          # will return cached local objects instead, which presumably were assigned earlier in
-          # `simple_attributes_to_copy()`.
-          remote_object.send(association_name).reload.each(&block)
-        end
+        # association_class = remote_object.class.reflect_on_all_associations(:has_and_belongs_to_many).find { |a| a.name == association_name }.klass
+        # if association_class.column_names.include?('id')
+
+        # if association_table_has_id?(remote_object, :has_and_belongs_to_many, association_name)
+        #   remote_object.send(association_name).find_each(&block)
+        # else # Some join tables do not have an `id` column, in which case find_each() cannot be used.
+        #   raise "DOESN"
+
+        #   # Reload the association to force load the associated remote objects. Without this, the association
+        #   # will return cached local objects instead, which presumably were assigned earlier in
+        #   # `simple_attributes_to_copy()`.
+        #   remote_object.send(association_name).reload.each(&block)
+        # end
       end
     end
   end
