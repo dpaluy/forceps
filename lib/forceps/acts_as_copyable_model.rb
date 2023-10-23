@@ -305,46 +305,6 @@ module Forceps
 
             assert_associated_object_is_remote(remote_associated_object, remote_object, association_name)
 
-            unless remote_object.class.name.start_with?('Forceps::Remote::')
-              puts ""
-              puts "*****"
-              puts "DANGER3: #{association_name} - #{remote_object.inspect}"
-              puts "DANGER4: #{association_name} - #{remote_associated_object.inspect}"
-              puts ""
-            end
-
-            if remote_object.class.name == 'Forceps::Remote::StorePurchase'
-              puts ""
-              puts "*****"
-              puts "BELONGS_TO1: #{association_name} - #{remote_object.inspect}"
-              puts "BELONGS_TO2: #{association_name} - #{remote_associated_object.inspect}"
-              puts ""
-            end
-
-            if remote_associated_object.class.name == 'Club'
-              puts ""
-              puts "*****"
-              puts "CLUB1: #{association_name} - #{remote_object.inspect}"
-              puts "CLUB2: #{association_name} - #{remote_associated_object.inspect}"
-              puts ""
-            end
-
-            if remote_associated_object.class.name == 'StoreItem'
-              puts ""
-              puts "*****"
-              puts "STORE ITEM1: #{association_name} - #{remote_object.inspect}"
-              puts "STORE ITEM2: #{association_name} - #{remote_associated_object.inspect}"
-              puts ""
-            end
-
-            if remote_associated_object.class.name == 'StoreItemPurchase'
-              puts ""
-              puts "*****"
-              puts "STORE ITEM PURCHASE1: #{association_name} - #{remote_object.inspect}"
-              puts "STORE ITEM PURCHASE2: #{association_name} - #{remote_associated_object.inspect}"
-              puts ""
-            end
-
             copy(remote_associated_object) if remote_associated_object
           end
         end
@@ -354,8 +314,8 @@ module Forceps
         # TODO:
         #   find_each demands an id column which some join tables do not have, so use just .each
         #   .. we should get the associated class and check it's column_names for 'id'
-        remote_object.send(association_name).find_each do |remote_associated_object|
-        # remote_object.send(association_name).each do |remote_associated_object|
+        # remote_object.send(association_name).find_each do |remote_associated_object|
+        remote_object.send(association_name).each do |remote_associated_object|
           assert_associated_object_is_remote(remote_associated_object, remote_object, association_name)
 
           cloned_local_associated_object = copy(remote_associated_object)
