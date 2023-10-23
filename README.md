@@ -168,7 +168,7 @@ Use `update_local_model` where possible because it will apply a safeguard in whi
 
 # STI best practice
 
-For a class that is a parent model in STI, use `ignore_model` to ignore that class. This way, a Forceps remote class (e.g. `Forceps::Remote::Parent`) will not be generated for the parent class because the existence of the remote class will cause ActiveRecord to complain "Invalid single-table inheritance type: Forceps::Remote::Child is not a subclass of Forceps::Remote::Parent". ActiveRecord somehow knows that a model is an STI parent and its supposed decendants do not inherit from it, which occurs in Forceps because `Forceps::Remote:Child` has to inherit `Child` and therefore cannot inherit `Forceps::Remote::Parent` unless one day Ruby allow a cloned class to inherit a different parent, e.g. `Forceps::Remote:Child` -> `ClonedChild` -> `Forceps::Remote::Parent`.
+For a class that is a parent model in STI, use `ignore_model` to ignore that class. This way, a Forceps remote class (e.g. `Forceps::Remote::Parent`) will not be generated for the parent class because the existence of the remote class will cause ActiveRecord to complain "Invalid single-table inheritance type: Forceps::Remote::Child is not a subclass of Forceps::Remote::Parent". ActiveRecord somehow knows that a model is an STI parent and its supposed decendants do not inherit from it, which is true in Forceps because `Forceps::Remote:Child` has to inherit `Child` and therefore cannot inherit `Forceps::Remote::Parent` unless one day Ruby allow a cloned class to inherit a different parent, e.g. `Forceps::Remote:Child` -> `ClonedChild` -> `Forceps::Remote::Parent`.
 
 ### Rails and lazy loading
 

@@ -78,7 +78,7 @@ module Forceps
       rescue ActiveRecord::StatementInvalid => e
         raise e unless e.cause.is_a?(PG::UndefinedTable)
 
-        # Prevent error caused by auto-generated framework models.
+        # Prevent error caused by auto-generated framework models, e.g. ActionText::RichText.
         puts "Ignoring model without table: #{local_class}"
         @models_without_table << local_class
         return nil

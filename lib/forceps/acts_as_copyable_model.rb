@@ -34,8 +34,6 @@ module Forceps
       end
 
       def copy(remote_object)
-        raise "BOOM1: #{remote_object.id}" if remote_object.class.base_class.name == 'Club' && remote_object.id != 18827
-
         copy_associated_objects_in_belongs_to(remote_object) unless copied_remote_objects[remote_object]
         cached_local_copy(remote_object) || perform_copy(remote_object)
       end
