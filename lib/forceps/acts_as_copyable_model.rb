@@ -324,7 +324,7 @@ module Forceps
         association_class.column_names.include?('id')
       end
 
-      def association_find_each(remote_object, association_kind, association_name, &block)
+      def association_find_each(remote_object, association_kind, association_name, block)
         if association_table_has_id?(remote_object, association_kind, association_name)
           remote_object.send(association_name).find_each(block)
         else # Some join tables do not have an `id` column, in which case find_each() cannot be used.
@@ -347,7 +347,7 @@ module Forceps
           end
         end
 
-        association_find_each(remote_object, :has_and_belongs_to_many, association_name, block)
+        association_find_each(remote_object, :has_and_belongs_to_many, association_name, &block)
 
         # association_class = remote_object.class.reflect_on_all_associations(:has_and_belongs_to_many).find { |a| a.name == association_name }.klass
         # if association_class.column_names.include?('id')
