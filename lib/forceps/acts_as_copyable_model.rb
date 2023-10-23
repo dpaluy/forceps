@@ -251,17 +251,17 @@ module Forceps
       end
 
       def copy_objects_associated_by_association_kind(local_object, remote_object, association_kind)
-        puts "*** copy_objects_associated_by_association_kind1"
+        # puts "*** copy_objects_associated_by_association_kind1"
 
         associations_to_copy(remote_object, association_kind).collect(&:name).each do |association_name|
-          puts "*** copy_objects_associated_by_association_kind2: #{association_name}"
+          # puts "*** copy_objects_associated_by_association_kind2: #{association_name}"
 
           force_crawl_association = level <= 1
 
           # Always crawl associations initially even if the model is in `ignore_model`. This allows us to
           # copy a specific record without copying other records from the same model.
           if force_crawl_association || !options.fetch(:ignore_model, []).include?(remote_object.class.base_class.name)
-            puts "*** copy_objects_associated_by_association_kind3"
+            # puts "*** copy_objects_associated_by_association_kind3"
 
             send "copy_associated_objects_in_#{association_kind}", local_object, remote_object, association_name
           end
@@ -271,7 +271,7 @@ module Forceps
       def associations_to_copy(remote_object, association_kind)
         excluded_attributes = attributes_to_exclude(remote_object)
         remote_object.class.reflect_on_all_associations(association_kind).reject do |association|
-          puts "*** associations_to_copy1: #{association.klass.name} -- #{options.fetch(:ignore_model, []).include?(to_local_class_name(association.klass.name))}"
+          # puts "*** associations_to_copy1: #{association.klass.name} -- #{options.fetch(:ignore_model, []).include?(to_local_class_name(association.klass.name))}"
 
           association.options[:through] ||
             excluded_attributes.include?(:all_associations) ||
@@ -332,7 +332,8 @@ module Forceps
         #   .. we should get the associated class and check it's column_names for 'id'
         # remote_object.send(association_name).find_each do |remote_associated_object|
 
-        remote_object.send(association_name).reload.each do |remote_associated_object|
+
+        block = lambda do |remote_associated_object|
           assert_associated_object_is_remote(remote_associated_object, remote_object, association_name)
 
           cloned_local_associated_object = copy(remote_associated_object)
@@ -340,6 +341,19 @@ module Forceps
             local_object.send(association_name) << cloned_local_associated_object
           end
         end
+
+        association_class = remote_object.class.reflect_on_all_associations(:has_and_belongs_to_many).find { |a| a.name == association_name }.klass
+        if association_class.column_names.include?('id')
+          remote_object.send(association_name).find_each(&block)
+        else
+          raise "DOESN"
+
+          # Reload the association to force load the associated remote objects. Without this, the association
+          # will return cached local objects instead, which presumably were assigned earlier in
+          # `simple_attributes_to_copy()`.
+          remote_object.send(association_name).reload.each(&block)
+        end
+
       end
     end
   end
