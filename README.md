@@ -164,12 +164,11 @@ Then anytime this model is reached while copying a relation, it will be ignored.
 
 Both `update_local_model` and `update_optional_local_model` will tell this tool to load a local model and update it with the attributes from the remote model. It's useful to reconstruct associations that have been nullified, i.e. the associated model exists but it has been unlinked.
 
-Use `update_local_model` where possible. Only use `update_optional_local_model` in rare cases where the existence of local models are conditional. For example, `has_many :items, -> { where(active: true) }, dependent: :delete_all
+Use `update_local_model` where possible because it will apply a safeguard in which an error will be raised if it turns out that the model doesn't exist. Only use `update_optional_local_model` in rare cases where the existence of local models are conditional. For example, `has_many :items, -> { where(active: true) }, dependent: :delete_all`.
 
 # STI best practice
 
-For a class that is a parent model in STI, use `ignore_model` to ignore that class. This way,
-a Forceps remote class (e.g. `Forceps::Remote::Parent`) will not be generated for the parent class because the existence of the remote class will cause ActiveRecord to complain "Invalid single-table inheritance type: Forceps::Remote::Child is not a subclass of Forceps::Remote::Parent". ActiveRecord somehow knows that a model is an STI parent and its supposed decendants do not inherit from it, which occurs in Forceps because `Forceps::Remote:Child` has to inherit `Child` and therefore cannot inherit `Forceps::Remote::Parent` unless one day Ruby allow a cloned class to inherit a different parent, e.g. `Forceps::Remote:Child` -> `ClonedChild` -> `Forceps::Remote::Parent`.
+For a class that is a parent model in STI, use `ignore_model` to ignore that class. This way, a Forceps remote class (e.g. `Forceps::Remote::Parent`) will not be generated for the parent class because the existence of the remote class will cause ActiveRecord to complain "Invalid single-table inheritance type: Forceps::Remote::Child is not a subclass of Forceps::Remote::Parent". ActiveRecord somehow knows that a model is an STI parent and its supposed decendants do not inherit from it, which occurs in Forceps because `Forceps::Remote:Child` has to inherit `Child` and therefore cannot inherit `Forceps::Remote::Parent` unless one day Ruby allow a cloned class to inherit a different parent, e.g. `Forceps::Remote:Child` -> `ClonedChild` -> `Forceps::Remote::Parent`.
 
 ### Rails and lazy loading
 
