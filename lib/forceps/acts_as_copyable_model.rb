@@ -31,10 +31,6 @@ module Forceps
         @reused_local_objects = Set.new
         @options = options
         @level = 0
-
-        # Always crawl associations initially even if the model is in `ignore_model`. This allows us to
-        # copy a specific record without copying other records from the same model.
-        # @force_crawl_association = true
       end
 
       def copy(remote_object)
@@ -54,7 +50,6 @@ module Forceps
 
       def perform_copy(remote_object)
         copied_object = local_copy_with_simple_attributes(remote_object)
-        # raise 'Copied object should not be nil' unless copied_object
         copied_remote_objects[remote_object] = copied_object
         copy_associated_objects(copied_object, remote_object) unless was_reused?(copied_object)
         copied_object
@@ -245,18 +240,12 @@ module Forceps
       end
 
       def copy_objects_associated_by_association_kind(local_object, remote_object, association_kind)
-        # puts "*** copy_objects_associated_by_association_kind1"
-
         associations_to_copy(remote_object, association_kind).collect(&:name).each do |association_name|
-          # puts "*** copy_objects_associated_by_association_kind2: #{association_name}"
-
           force_crawl_association = level <= 1
 
           # Always crawl associations initially even if the model is in `ignore_model`. This allows us to
           # copy a specific record without copying other records from the same model.
           if force_crawl_association || !options.fetch(:ignore_model, []).include?(remote_object.class.base_class.name)
-            # puts "*** copy_objects_associated_by_association_kind3"
-
             send "copy_associated_objects_in_#{association_kind}", local_object, remote_object, association_name
           end
         end
@@ -265,8 +254,6 @@ module Forceps
       def associations_to_copy(remote_object, association_kind)
         excluded_attributes = attributes_to_exclude(remote_object)
         remote_object.class.reflect_on_all_associations(association_kind).reject do |association|
-          # puts "*** associations_to_copy1: #{association.klass.name} -- #{options.fetch(:ignore_model, []).include?(to_local_class_name(association.klass.name))}"
-
           association.options[:through] ||
             excluded_attributes.include?(:all_associations) ||
             excluded_attributes.include?(association.name) ||
@@ -288,16 +275,6 @@ module Forceps
       end
 
       def copy_associated_objects_in_has_many(local_object, remote_object, association_name)
-        # TODO:
-        #   find_each demands an id column which some join tables do not have, so use just .each
-        #   .. we should get the associated class and check it's column_names for 'id'
-        # remote_object.send(association_name).find_each do |remote_associated_object|
-        # # remote_object.send(association_name).each do |remote_associated_object|
-        #   assert_associated_object_is_remote(remote_associated_object, remote_object, association_name)
-
-        #   local_object.send(association_name) << copy(remote_associated_object)
-        # end
-
         block = lambda do |remote_associated_object|
           assert_associated_object_is_remote(remote_associated_object, remote_object, association_name)
 
@@ -354,20 +331,6 @@ module Forceps
         end
 
         association_find_each(remote_object, :has_and_belongs_to_many, association_name, &block)
-
-        # association_class = remote_object.class.reflect_on_all_associations(:has_and_belongs_to_many).find { |a| a.name == association_name }.klass
-        # if association_class.column_names.include?('id')
-
-        # if association_table_has_id?(remote_object, :has_and_belongs_to_many, association_name)
-        #   remote_object.send(association_name).find_each(&block)
-        # else # Some join tables do not have an `id` column, in which case find_each() cannot be used.
-        #   raise "DOESN"
-
-        #   # Reload the association to force load the associated remote objects. Without this, the association
-        #   # will return cached local objects instead, which presumably were assigned earlier in
-        #   # `simple_attributes_to_copy()`.
-        #   remote_object.send(association_name).reload.each(&block)
-        # end
       end
     end
   end
