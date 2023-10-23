@@ -31,10 +31,14 @@ module Forceps
         @reused_local_objects = Set.new
         @options = options
         @level = 0
+
+        # Always crawl associations initially even if the model is in `ignore_model`. This allows us to
+        # copy a specific record without copying other records from the same model.
+        @force_crawl_association = true
       end
 
       def copy(remote_object)
-        return if remote_object.class.base_class.name == 'Club' && remote_object.id != 18827
+        raise "BOOM1" if remote_object.class.base_class.name == 'Club' && remote_object.id != 18827
 
         copy_associated_objects_in_belongs_to(remote_object) unless copied_remote_objects[remote_object]
         cached_local_copy(remote_object) || perform_copy(remote_object)
@@ -248,8 +252,8 @@ module Forceps
 
       def copy_objects_associated_by_association_kind(local_object, remote_object, association_kind)
         associations_to_copy(remote_object, association_kind).collect(&:name).each do |association_name|
-          raise "LEVEL: #{level}"
-          unless options.fetch(:ignore_model, []).include?(remote_object.class.base_class.name)
+          if @force_crawl_association || !options.fetch(:ignore_model, []).include?(remote_object.class.base_class.name)
+            @force_crawl_association = false
             send "copy_associated_objects_in_#{association_kind}", local_object, remote_object, association_name
           end
         end
