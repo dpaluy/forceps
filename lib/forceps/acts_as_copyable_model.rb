@@ -236,19 +236,12 @@ module Forceps
       end
 
       def copy_associated_objects(local_object, remote_object)
-        puts "*** copy_associated_objects1"
-
         with_nested_logging do
           [:has_one, :has_many, :has_and_belongs_to_many].each do |association_kind|
             copy_objects_associated_by_association_kind(local_object, remote_object, association_kind)
             local_object.save!(validate: false)
           end
         end
-
-        puts "*** copy_associated_objects2"
-
-        # Non-root associations (i.e. level > 1) can be ignored.
-        # @force_crawl_association = false
       end
 
       def with_nested_logging
@@ -265,7 +258,8 @@ module Forceps
 
           force_crawl_association = level <= 1
 
-          # Don't ignore associations if this object is the root object.
+          # Always crawl associations initially even if the model is in `ignore_model`. This allows us to
+          # copy a specific record without copying other records from the same model.
           if force_crawl_association || !options.fetch(:ignore_model, []).include?(remote_object.class.base_class.name)
             puts "*** copy_objects_associated_by_association_kind3"
 
