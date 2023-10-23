@@ -38,7 +38,7 @@ module Forceps
       end
 
       def copy(remote_object)
-        raise "BOOM1" if remote_object.class.base_class.name == 'Club' && remote_object.id != 18827
+        raise "BOOM1: #{remote_object.id}" if remote_object.class.base_class.name == 'Club' && remote_object.id != 18827
 
         copy_associated_objects_in_belongs_to(remote_object) unless copied_remote_objects[remote_object]
         cached_local_copy(remote_object) || perform_copy(remote_object)
@@ -252,11 +252,13 @@ module Forceps
 
       def copy_objects_associated_by_association_kind(local_object, remote_object, association_kind)
         associations_to_copy(remote_object, association_kind).collect(&:name).each do |association_name|
+          # Don't ignore associations if this object is the root object.
           if @force_crawl_association || !options.fetch(:ignore_model, []).include?(remote_object.class.base_class.name)
-            @force_crawl_association = false
             send "copy_associated_objects_in_#{association_kind}", local_object, remote_object, association_name
           end
         end
+
+        @force_crawl_association = false
       end
 
       def associations_to_copy(remote_object, association_kind)
