@@ -291,12 +291,20 @@ module Forceps
         # TODO:
         #   find_each demands an id column which some join tables do not have, so use just .each
         #   .. we should get the associated class and check it's column_names for 'id'
-        remote_object.send(association_name).find_each do |remote_associated_object|
-        # remote_object.send(association_name).each do |remote_associated_object|
+        # remote_object.send(association_name).find_each do |remote_associated_object|
+        # # remote_object.send(association_name).each do |remote_associated_object|
+        #   assert_associated_object_is_remote(remote_associated_object, remote_object, association_name)
+
+        #   local_object.send(association_name) << copy(remote_associated_object)
+        # end
+
+        block = lambda do |remote_associated_object|
           assert_associated_object_is_remote(remote_associated_object, remote_object, association_name)
 
           local_object.send(association_name) << copy(remote_associated_object)
         end
+
+        association_find_each(remote_object, :has_many, association_name, &block)
       end
 
       def copy_associated_objects_in_has_one(local_object, remote_object, association_name)
