@@ -166,6 +166,9 @@ Both `update_local_model` and `update_optional_local_model` will tell this tool 
 
 Use `update_local_model` where possible. Only use `update_optional_local_model` in rare cases where the existence of local models are conditional. For example, `has_many :items, -> { where(active: true) }, dependent: :delete_all
 
+For a class that is a parent model in STI, use `ignore_model` to ignore that class. This way,
+a Forceps remote class (e.g. `Forceps::Remote::Parent`) will not be generated for the parent class because the existence of the remote class will cause ActiveRecord to complain "Invalid single-table inheritance type: Forceps::Remote::Child is not a subclass of Forceps::Remote::Parent". ActiveRecord somehow knows that a model is an STI parent and its supposed decendants do not inherit from it, which occurs in Forceps because `Forceps::Remote:Child` has to inherit `Child` and therefore cannot inherit `Forceps::Remote::Parent` unless one day Ruby allow a cloned class to inherit a different parent, e.g. `Forceps::Remote:Child` -> `ClonedChild` -> `Forceps::Remote::Parent`.
+
 ### Rails and lazy loading
 
 In development, Rails loads classes lazily as they are used. Forceps will only know how to handle those classes defined when `Forceps.configure` is executed. You can make sure that all the Rails models are loaded before executing `Forceps.configure` with:
