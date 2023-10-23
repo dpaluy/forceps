@@ -135,13 +135,7 @@ module Forceps
 
         copy_attributes(cloned_object, simple_attributes_to_copy(remote_object))
 
-        begin
-          cloned_object.save!(validate: false)
-          puts "SUCCEED1: #{remote_object.inspect}}"
-        rescue => e
-          puts "FAIL1: #{remote_object.inspect} - #{copied_remote_objects[remote_object]}"
-          raise e
-        end
+        cloned_object.save!(validate: false)
         invoke_callbacks(:after_each, cloned_object, remote_object)
         cloned_object
       end
@@ -345,7 +339,7 @@ module Forceps
         association_class = remote_object.class.reflect_on_all_associations(:has_and_belongs_to_many).find { |a| a.name == association_name }.klass
         if association_class.column_names.include?('id')
           remote_object.send(association_name).find_each(&block)
-        else
+        else # Some join tables do not have an `id` column, in which case find_each() cannot be used.
           raise "DOESN"
 
           # Reload the association to force load the associated remote objects. Without this, the association
@@ -353,7 +347,6 @@ module Forceps
           # `simple_attributes_to_copy()`.
           remote_object.send(association_name).reload.each(&block)
         end
-
       end
     end
   end
