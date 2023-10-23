@@ -236,12 +236,16 @@ module Forceps
       end
 
       def copy_associated_objects(local_object, remote_object)
+        puts "*** copy_associated_objects1"
+
         with_nested_logging do
           [:has_one, :has_many, :has_and_belongs_to_many].each do |association_kind|
             copy_objects_associated_by_association_kind(local_object, remote_object, association_kind)
             local_object.save!(validate: false)
           end
         end
+
+        puts "*** copy_associated_objects2"
 
         # Non-root associations (i.e. level > 1) can be ignored.
         @force_crawl_association = false
