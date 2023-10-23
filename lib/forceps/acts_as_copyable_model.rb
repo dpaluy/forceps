@@ -242,6 +242,9 @@ module Forceps
             local_object.save!(validate: false)
           end
         end
+
+        # Non-root associations (i.e. level > 1) can be ignored.
+        @force_crawl_association = false
       end
 
       def with_nested_logging
@@ -262,8 +265,6 @@ module Forceps
             send "copy_associated_objects_in_#{association_kind}", local_object, remote_object, association_name
           end
         end
-
-        @force_crawl_association = false
       end
 
       def associations_to_copy(remote_object, association_kind)
