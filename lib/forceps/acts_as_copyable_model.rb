@@ -34,7 +34,7 @@ module Forceps
 
         # Always crawl associations initially even if the model is in `ignore_model`. This allows us to
         # copy a specific record without copying other records from the same model.
-        @force_crawl_association = true
+        # @force_crawl_association = true
       end
 
       def copy(remote_object)
@@ -248,7 +248,7 @@ module Forceps
         puts "*** copy_associated_objects2"
 
         # Non-root associations (i.e. level > 1) can be ignored.
-        @force_crawl_association = false
+        # @force_crawl_association = false
       end
 
       def with_nested_logging
@@ -262,8 +262,11 @@ module Forceps
 
         associations_to_copy(remote_object, association_kind).collect(&:name).each do |association_name|
           puts "*** copy_objects_associated_by_association_kind2: #{association_name}"
+
+          force_crawl_association = level <= 1
+
           # Don't ignore associations if this object is the root object.
-          if @force_crawl_association || !options.fetch(:ignore_model, []).include?(remote_object.class.base_class.name)
+          if force_crawl_association || !options.fetch(:ignore_model, []).include?(remote_object.class.base_class.name)
             puts "*** copy_objects_associated_by_association_kind3"
 
             send "copy_associated_objects_in_#{association_kind}", local_object, remote_object, association_name
