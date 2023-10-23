@@ -251,9 +251,14 @@ module Forceps
       end
 
       def copy_objects_associated_by_association_kind(local_object, remote_object, association_kind)
+        puts "*** copy_objects_associated_by_association_kind1"
+
         associations_to_copy(remote_object, association_kind).collect(&:name).each do |association_name|
+          puts "*** copy_objects_associated_by_association_kind2: #{association_name}"
           # Don't ignore associations if this object is the root object.
           if @force_crawl_association || !options.fetch(:ignore_model, []).include?(remote_object.class.base_class.name)
+            puts "*** copy_objects_associated_by_association_kind3"
+
             send "copy_associated_objects_in_#{association_kind}", local_object, remote_object, association_name
           end
         end
@@ -264,6 +269,8 @@ module Forceps
       def associations_to_copy(remote_object, association_kind)
         excluded_attributes = attributes_to_exclude(remote_object)
         remote_object.class.reflect_on_all_associations(association_kind).reject do |association|
+          puts "*** associations_to_copy1: #{association.klass.name} -- #{options.fetch(:ignore_model, []).include?(to_local_class_name(association.klass.name))}"
+
           association.options[:through] ||
             excluded_attributes.include?(:all_associations) ||
             excluded_attributes.include?(association.name) ||
